@@ -17,7 +17,7 @@ type UserInfoResponse struct {
 	NetdiskName  string `json:"netdisk_name"`
 	AvatarUrl    string `json:"avatar_url"`
 	VipType      int    `json:"vip_type"`
-	Uk           int64  `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
+	Uk           int    `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
 	ErrorCode    int    `json:"errno"`
 	ErrorMsg     string `json:"errmsg"`
 	RequestID    int
@@ -73,11 +73,7 @@ func (a *Account) UserInfo() (UserInfoResponse, error) {
 	}
 
 	//兼容用户信息接口返回的request_id为string类型的问题
-	ret.RequestID, err = strconv.Atoi(ret.RequestIDStr)
-	if err != nil {
-		log.Println("strconv.Atoi failed, err:", err)
-		return ret, err
-	}
+	ret.RequestID, _ = strconv.Atoi(ret.RequestIDStr)
 
 	return ret, nil
 }
