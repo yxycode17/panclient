@@ -4,30 +4,31 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jsyzchen/pan/conf"
-	"github.com/jsyzchen/pan/utils/httpclient"
 	"log"
 	"net/url"
 	"strconv"
+
+	"github.com/jsyzchen/pan/conf"
+	"github.com/jsyzchen/pan/utils/httpclient"
 )
 
 type UserInfoResponse struct {
-	BaiduName string `json:"baidu_name"`
-	NetdiskName string `json:"netdisk_name"`
-	AvatarUrl string `json:"avatar_url"`
-	VipType int `json:"vip_type"`
-	Uk int `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
-	ErrorCode int  	 `json:"errno"`
-	ErrorMsg  string `json:"errmsg"`
-	RequestID int
+	BaiduName    string `json:"baidu_name"`
+	NetdiskName  string `json:"netdisk_name"`
+	AvatarUrl    string `json:"avatar_url"`
+	VipType      int    `json:"vip_type"`
+	Uk           string `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
+	ErrorCode    int    `json:"errno"`
+	ErrorMsg     string `json:"errmsg"`
+	RequestID    int
 	RequestIDStr string `json:"request_id"` //用户信息接口返回的request_id为string类型
 }
 
 type QuotaResponse struct {
 	conf.CloudDiskResponseBase
-	Total int `json:"total"`
-	Used int `json:"used"`
-	Free int `json:"free"`
+	Total  int  `json:"total"`
+	Used   int  `json:"used"`
+	Free   int  `json:"free"`
 	Expire bool `json:"expire"`
 }
 
@@ -67,7 +68,7 @@ func (a *Account) UserInfo() (UserInfoResponse, error) {
 		return ret, err
 	}
 
-	if ret.ErrorCode != 0 {//错误码不为0
+	if ret.ErrorCode != 0 { //错误码不为0
 		return ret, errors.New(fmt.Sprintf("error_code:%d, error_msg:%s", ret.ErrorCode, ret.ErrorMsg))
 	}
 
@@ -106,7 +107,7 @@ func (a *Account) Quota() (QuotaResponse, error) {
 		return ret, err
 	}
 
-	if ret.ErrorCode != 0 {//错误码不为0
+	if ret.ErrorCode != 0 { //错误码不为0
 		return ret, errors.New(fmt.Sprintf("error_code:%d, error_msg:%s", ret.ErrorCode, ret.ErrorMsg))
 	}
 

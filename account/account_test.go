@@ -1,8 +1,9 @@
 package account
 
 import (
-	"github.com/jsyzchen/pan/conf"
 	"testing"
+
+	"github.com/jsyzchen/pan/conf"
 )
 
 func TestAccount_UserInfo(t *testing.T) {
