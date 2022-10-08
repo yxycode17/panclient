@@ -17,7 +17,7 @@ type UserInfoResponse struct {
 	NetdiskName  string `json:"netdisk_name"`
 	AvatarUrl    string `json:"avatar_url"`
 	VipType      int    `json:"vip_type"`
-	Uk           int64　`json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
+	Uk           int64  `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
 	ErrorCode    int    `json:"errno"`
 	ErrorMsg     string `json:"errmsg"`
 	RequestID    int
