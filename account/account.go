@@ -26,10 +26,10 @@ type UserInfoResponse struct {
 
 type QuotaResponse struct {
 	conf.CloudDiskResponseBase
-	Total  int  `json:"total"`
-	Used   int  `json:"used"`
-	Free   int  `json:"free"`
-	Expire bool `json:"expire"`
+	Total  int64 `json:"total"`
+	Used   int64 `json:"used"`
+	Free   int64 `json:"free"`
+	Expire bool  `json:"expire"`
 }
 
 type Account struct {
