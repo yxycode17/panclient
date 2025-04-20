@@ -111,7 +111,7 @@ func (a *Auth) AccessTokenByAuthCode(code, redirectUri string) (AccessTokenRespo
 
 	requestUrl := conf.BaiduOpenApiDomain + OAuthTokenUri + "?" + query
 
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err
@@ -144,7 +144,7 @@ func (a *Auth) DeviceCode() (DeviceCodeResponse, error) {
 
 	requestUrl := conf.BaiduOpenApiDomain + DeviceCodeUri + "?" + query
 
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err
@@ -178,7 +178,7 @@ func (a *Auth) AccessTokenByDeviceCode(deviceCode string) (AccessTokenResponse, 
 
 	requestUrl := conf.BaiduOpenApiDomain + OAuthTokenUri + "?" + query
 
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err
@@ -212,7 +212,7 @@ func (a *Auth) RefreshToken(refreshToken string) (RefreshTokenResponse, error) {
 
 	requestUrl := conf.BaiduOpenApiDomain + OAuthTokenUri + "?" + query
 
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err
@@ -245,7 +245,7 @@ func (a *Auth) UserInfo(accessToken string) (UserInfoResponse, error) {
 
 	requestUrl := conf.BaiduOpenApiDomain + UserInfoUri + "?" + query
 
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err

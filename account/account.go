@@ -17,10 +17,10 @@ type UserInfoResponse struct {
 	NetdiskName  string `json:"netdisk_name"`
 	AvatarUrl    string `json:"avatar_url"`
 	VipType      int    `json:"vip_type"`
-	Uk           int    `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
+	Uk           int64  `json:"uk"` //uk字段对应auth.UserInfo方法返回的user_id
 	ErrorCode    int    `json:"errno"`
 	ErrorMsg     string `json:"errmsg"`
-	RequestID    int
+	RequestID    int64
 	RequestIDStr string `json:"request_id"` //用户信息接口返回的request_id为string类型
 }
 
@@ -54,7 +54,7 @@ func (a *Account) UserInfo() (UserInfoResponse, error) {
 	query := v.Encode()
 
 	requestUrl := conf.OpenApiDomain + UserInfoUri + "&" + query
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err
@@ -73,7 +73,7 @@ func (a *Account) UserInfo() (UserInfoResponse, error) {
 	}
 
 	//兼容用户信息接口返回的request_id为string类型的问题
-	ret.RequestID, _ = strconv.Atoi(ret.RequestIDStr)
+	ret.RequestID, _ = strconv.ParseInt(ret.RequestIDStr, 10, 64)
 
 	return ret, nil
 }
@@ -89,7 +89,7 @@ func (a *Account) Quota() (QuotaResponse, error) {
 	query := v.Encode()
 
 	requestUrl := conf.OpenApiDomain + QuotaUri + "?" + query
-	resp, err := httpclient.Get(requestUrl, map[string]string{})
+	resp, err := httpclient.Get(nil, requestUrl, map[string]string{})
 	if err != nil {
 		log.Println("httpclient.Get failed, err:", err)
 		return ret, err

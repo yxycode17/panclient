@@ -2,7 +2,9 @@ package file
 
 import (
 	"bytes"
-	"github.com/jsyzchen/pan/utils/httpclient"
+	"context"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -10,17 +12,33 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/jsyzchen/pan/utils/httpclient"
 )
 
+type UploadSnapshot struct {
+	Path        string   `json:"path"`
+	LocalPath   string   `json:"local_path"`
+	UploadId    string   `json:"upload_id"`
+	FileMd5     string   `json:"file_md5"`
+	FileModTime int64    `json:"file_mtime"`
+	Recoverable bool     `json:"recoverable"`
+	DoneSize    int64    `json:"done_size"`
+	TotalSize   int64    `json:"total_size"`
+	SliceSize   int64    `json:"slice_size"`
+	SliceNum    int      `json:"slice_num"`
+	DoneSlices  []string `json:"done_slices"`
+}
+
 type Uploader struct {
-	Url string
+	Url      string
 	FilePath string
 }
 
-//NewFileUploader
+// NewFileUploader
 func NewFileUploader(url, filePath string) *Uploader {
 	return &Uploader{
-		Url: url,
+		Url:      url,
 		FilePath: filePath,
 	}
 }
@@ -83,30 +101,40 @@ func (u *Uploader) Upload() ([]byte, error) {
 	return respBody, nil
 }
 
-//直接通过字节上传
-func (u *Uploader) UploadByByte(fileByte []byte) ([]byte, error) {
+type ProgressByteReader struct {
+	io.Reader
+	Reporter func(int64)
+}
+
+func (pbr *ProgressByteReader) Read(p []byte) (nr int, err error) {
+	nr, err = pbr.Reader.Read(p)
+	if nr > 0 && pbr.Reporter != nil {
+		pbr.Reporter(int64(nr))
+	}
+	return
+}
+
+// 直接通过字节上传
+func (u *Uploader) UploadByByte(ctx context.Context, fileByte []byte, progressHandler func(int64)) ([]byte, error) {
 	ret := []byte("")
-
 	bodyBuf := &bytes.Buffer{}
-
 	bodyWriter := multipart.NewWriter(bodyBuf)
 	//"file" 为接收时定义的参数名
 	fileWriter, err := bodyWriter.CreateFormFile("file", filepath.Base(u.FilePath))
 	if err != nil {
-		log.Println("error writing to buffer, err:", err)
 		return ret, err
 	}
 
-	//iocopy
 	_, err = io.Copy(fileWriter, bytes.NewReader(fileByte))
 	if err != nil {
 		return ret, err
 	}
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
+	contentLength := bodyBuf.Len()
 
 	//提交请求
-	request, err := http.NewRequest("POST", u.Url, bodyBuf)
+	request, err := http.NewRequestWithContext(ctx, "POST", u.Url, &ProgressByteReader{bodyBuf, progressHandler})
 	if err != nil {
 		return ret, err
 	}
@@ -115,21 +143,24 @@ func (u *Uploader) UploadByByte(fileByte []byte) ([]byte, error) {
 	//随机设置一个User-Agent
 	userAgent := httpclient.GetRandomUserAgent()
 	request.Header.Set("User-Agent", userAgent)
+	request.ContentLength = int64(contentLength)
 
 	//处理返回结果
 	client := &http.Client{}
 	resp, err := client.Do(request)
-	//打印接口返回信息
 	if err != nil {
-		log.Println("上传错误信息：", err)
 		return ret, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return ret, errors.New(fmt.Sprintf("http error status: %d msg: %s", resp.StatusCode, resp.Status))
+	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return ret, err
 	}
-	//根据实际需要，返回相应的信息
+
 	return respBody, nil
 }

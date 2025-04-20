@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"context"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -14,18 +15,30 @@ type HttpResponse struct {
 	Body       []byte
 }
 
-func SendRequest(method string, url string, header map[string]string, body string) (HttpResponse, error) {
+func SendRequest(ctx context.Context, method string, url string, header map[string]string, body string) (HttpResponse, error) {
 	client := &http.Client{}
 	var res HttpResponse
 	var request *http.Request
 	var err error
 	if method == "POST" {
-		request, err = http.NewRequest(method, url, strings.NewReader(body))
+		if ctx == nil {
+			request, err = http.NewRequest(method, url, strings.NewReader(body))
+		} else {
+			request, err = http.NewRequestWithContext(ctx, method, url, strings.NewReader(body))
+		}
 		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else if method == "PUT" {
-		request, err = http.NewRequest(method, url, strings.NewReader(body))
+		if ctx == nil {
+			request, err = http.NewRequest(method, url, strings.NewReader(body))
+		} else {
+			request, err = http.NewRequestWithContext(ctx, method, url, strings.NewReader(body))
+		}
 	} else {
-		request, err = http.NewRequest(method, url, nil)
+		if ctx == nil {
+			request, err = http.NewRequest(method, url, nil)
+		} else {
+			request, err = http.NewRequestWithContext(ctx, method, url, nil)
+		}
 	}
 
 	if err != nil {
@@ -56,24 +69,24 @@ func SendRequest(method string, url string, header map[string]string, body strin
 	return res, nil
 }
 
-func Post(url string, header map[string]string, body string) (HttpResponse, error) {
-	return SendRequest("POST", url, header, body)
+func Post(ctx context.Context, url string, header map[string]string, body string) (HttpResponse, error) {
+	return SendRequest(ctx, "POST", url, header, body)
 }
 
-func Put(url string, header map[string]string, body string) (HttpResponse, error) {
-	return SendRequest("PUT", url, header, body)
+func Put(ctx context.Context, url string, header map[string]string, body string) (HttpResponse, error) {
+	return SendRequest(ctx, "PUT", url, header, body)
 }
 
-func Get(url string, header map[string]string) (HttpResponse, error) {
-	return SendRequest("GET", url, header, "")
+func Get(ctx context.Context, url string, header map[string]string) (HttpResponse, error) {
+	return SendRequest(ctx, "GET", url, header, "")
 }
 
-func Head(url string, header map[string]string) (HttpResponse, error) {
-	return SendRequest("HEAD", url, header, "")
+func Head(ctx context.Context, url string, header map[string]string) (HttpResponse, error) {
+	return SendRequest(ctx, "HEAD", url, header, "")
 }
 
-func Delete(url string, header map[string]string) (HttpResponse, error) {
-	return SendRequest("DELETE", url, header,"")
+func Delete(ctx context.Context, url string, header map[string]string) (HttpResponse, error) {
+	return SendRequest(ctx, "DELETE", url, header, "")
 }
 
 // 随机获取User-Agent
